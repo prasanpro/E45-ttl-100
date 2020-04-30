@@ -52,7 +52,7 @@ void setup()
 	ResponseStructContainer c;
 	c = e32ttl.getConfiguration();
 	Configuration configuration = *(Configuration*) c.data;
- configuration.HEAD = 0xC0;
+  configuration.HEAD = 0xC0;
 	configuration.ADDL = 0;
 	configuration.ADDH = 0;
 	configuration.CHAN = 0x06;
@@ -74,6 +74,7 @@ void setup()
 struct Message {
     char message[8];
     byte temperature[4];
+    int power[3];
 };
 //struct MessageHumidity {
 //    char message[8];
@@ -91,12 +92,14 @@ void loop()
 		String typeStr = rs.data;
 
 		Serial.println(typeStr);
-		if (typeStr=="TEMP"){
+		if (typeStr=="LEVL"){
 			ResponseStructContainer rsc = e32ttl.receiveMessage(sizeof(Message));
 			struct Message message = *(Message*) rsc.data;
-
+      Serial.println(message.message);
 			Serial.println(*(float*)(message.temperature));
-			Serial.println(message.message);
+      int pwr = *(float*)(message.power);
+      Serial.println("Received power->");
+      Serial.println(getTransmissionPowerDescriptionByParams(pwr));
 			free(rsc.data);
 		}
 		/*
@@ -147,3 +150,24 @@ void printModuleInformation(struct ModuleInformation moduleInformation) {
 	Serial.println("----------------------------------------");
 
 }
+
+String getTransmissionPowerDescriptionByParams(int transmissionPower)
+  {
+    switch (transmissionPower)
+    {
+      case POWER_20:
+      return F("20dBm (Default)");
+      break;
+      case POWER_17:
+      return F("17dBm");
+      break;
+      case POWER_14:
+      return F("14dBm");
+      break;
+      case POWER_10:
+      return F("10dBm");
+      break;
+      default:
+      return F("Invalid transmission power param");
+    }
+  }

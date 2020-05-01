@@ -50,10 +50,17 @@ void setup()
 	ResponseStructContainer c;
 	c = e32ttl.getConfiguration();
 	Configuration configuration = *(Configuration*) c.data;
-	configuration.ADDL = 0x00;
+  configuration.HEAD = 0xC2;
+	configuration.ADDL = 0x01;
 	configuration.ADDH = 0x00;
-	configuration.CHAN = 0x06;
+	configuration.CHAN = 0x04;
 	configuration.OPTION.fixedTransmission = FT_FIXED_TRANSMISSION;
+  configuration.OPTION.transmissionPower = POWER_20;
+  configuration.OPTION.wirelessWakeupTime = WAKE_UP_250;
+  configuration.OPTION.fec = FEC_1_ON;
+  configuration.SPED.uartParity = MODE_00_8N1;
+  configuration.SPED.uartBaudRate = UART_BPS_57600;
+  configuration.SPED.airDataRate = AIR_DATA_RATE_010_24;
 	e32ttl.setConfiguration(configuration, WRITE_CFG_PWR_DWN_SAVE);
 	printParameters(configuration);
 	// ---------------------------
@@ -114,7 +121,7 @@ void loop()
     DEBUG_PRINT(F("Water level ")); DEBUG_PRINT(" -> "); DEBUG_PRINTLN(percentage);
     *(float*)(message.temperature) = percentage;
       
-    ResponseStatus rs = e32ttl.sendFixedMessage(0,0,6,&message, sizeof(Message));
+    ResponseStatus rs = e32ttl.sendFixedMessage(0,3,0x04,&message, sizeof(Message));
     DEBUG_PRINTLN(rs.getResponseDescription());
   }
 
@@ -123,7 +130,7 @@ void loop()
     DEBUG_PRINT(F("Reading error ")); DEBUG_PRINT(" -> "); DEBUG_PRINTLN(F("0.0"));
     *(float*)(message.temperature) = 0.0;
 
-    ResponseStatus rs = e32ttl.sendFixedMessage(0,0,6,&message, sizeof(Message));
+    ResponseStatus rs = e32ttl.sendFixedMessage(0,3,0x04,&message, sizeof(Message));
     DEBUG_PRINTLN(rs.getResponseDescription());
   }
 	
